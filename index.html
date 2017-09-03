@@ -1,20 +1,17 @@
-<!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<meta name="description" content="cereal explores the world of programming">
-		<meta name="author" content="Kai Oliver Quambusch">
-		<link rel="icon" href="/img/favicon.ico">
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+		<meta name="description" content="cereal explores the world of programming"/>
+		<meta name="author" content="Kai Oliver Quambusch"/>
+		<link rel="icon" href="/img/favicon.ico"/>
 
-		<title>Naïve Approaches 😛</title>
+		<title>Na&#239;ve Approaches &#128539;</title>
 
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous"/>
+		<link rel="stylesheet" href="/css/style.css"/>
 	</head>
-
 	<body>
-
 		<div class="blog-masthead">
 			<div class="container">
 				<nav class="nav">
@@ -23,13 +20,197 @@
 				</nav>
 			</div>
 		</div>
-
 		<div class="blog-header">
 			<div class="container">
-				<h1 class="blog-title">Naïve Approaches 😛</h1>
+				<h1 class="blog-title">Na&#239;ve Approaches &#128539;</h1>
 				<p class="lead blog-description">Impossible?! HOLD MY BEER!</p>
 			</div>
 		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-8 blog-main">
+				<div class="blog-post">
+	<h2 class="blog-post-title">Templer</h2>
+	<p class="blog-post-meta">2017-09-03 by <a href="/about.html">cereal</a></p><div><p>Well, that escalated quickly - Ladies and Gentlemen, I proudly present the<br/>
+first working Prototype of my github.io blog generator (yeah - I know..<br/>
+I'm not the first one)!  </p>
+<p>Whenever I wanted to start a blog I couldn't do so without starting to hack<br/>
+on a blogging software (as i mentioned before - I know..). I eventually got<br/>
+distracted or tired every single time after some hours of manic planning and<br/>
+designing - over-engineering every single detail, sketching mind-maps,<br/>
+data-models, etc. on pages of college blocks to dump every piece of<br/>
+information on paper (which were already perfectly sorted for a start  in my head).<br/>
+Well, I got tiered and did something else (like sleeping or being frustrated <br/>
+about the situation I run into every time).  </p>
+<p>Today is the day when I said to myself: "Okay - just start with handcrafted<br/>
+HTML and move on from there ... just like you do when you get paid for it."<br/>
+It worked.  </p>
+<p>Templer takes two templates (<code>index.html</code> and <code>article.html</code>) and converts<br/>
+markdown files (blog-posts/articles) found in a specified path to compile it<br/>
+all together into the <code>index.html</code> of the configured destination path.<br/>
+Everything is static and I just <em>kept it simple stupid</em> - hrhr <code>wc -l *.py</code> = 86 lines  </p>
+<p>To be honest - I didn't even wanted to write such a tool before I had a bunch of<br/>
+unmanagable HTML code, but I HAD TO. Here is the code - have fun!  </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77</pre></div></td><td class="code"><div class="highlight"><pre><span/><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># author: Kai Oliver Quambusch 2017</span>
 
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">stat</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">pyquery</span> <span class="kn">import</span> <span class="n">PyQuery</span> <span class="k">as</span> <span class="n">pq</span>
+<span class="kn">from</span> <span class="nn">markdown</span> <span class="kn">import</span> <span class="n">Markdown</span>
+<span class="kn">from</span> <span class="nn">mdx_gfm</span> <span class="kn">import</span> <span class="n">GithubFlavoredMarkdownExtension</span>
+<span class="kn">import</span> <span class="nn">config</span>
+
+<span class="n">Article</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">'Article'</span><span class="p">,</span> <span class="p">[</span><span class="s2">"mtime"</span><span class="p">,</span> <span class="s2">"headline"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">articles_path</span><span class="p">,</span> <span class="n">destination_path</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">False</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">,</span> <span class="p">(</span><span class="n">articles_path</span><span class="p">,</span> <span class="n">destination_path</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">articles</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">articles_path</span><span class="p">,</span> <span class="s2">"*.md"</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">articles</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destination_path</span><span class="p">,</span> <span class="s2">"index.html"</span><span class="p">),</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">index_fobj</span><span class="p">:</span>
+        <span class="n">index_html</span> <span class="o">=</span> <span class="n">index_fobj</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_html</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">markdown_parser</span> <span class="o">=</span> <span class="n">Markdown</span><span class="p">(</span><span class="n">extensions</span><span class="o">=</span><span class="p">[</span><span class="n">GithubFlavoredMarkdownExtension</span><span class="p">()])</span>
+    <span class="c1"># convert markdown articles to html</span>
+    <span class="n">articles_html</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">article_path</span> <span class="ow">in</span> <span class="n">articles</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">article_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">article_fobj</span><span class="p">:</span>
+            <span class="n">article_md</span> <span class="o">=</span> <span class="n">article_fobj</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="n">article_headline</span> <span class="o">=</span> <span class="n">article_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"--"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span>
+        <span class="n">article_stat</span> <span class="o">=</span> <span class="n">stat</span><span class="p">(</span><span class="n">article_path</span><span class="p">)</span>
+        <span class="n">mtime</span> <span class="o">=</span> <span class="n">article_stat</span><span class="o">.</span><span class="n">st_mtime</span>
+
+        <span class="n">articles_html</span><span class="p">[</span><span class="n">article_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">Article</span><span class="p">(</span>
+            <span class="n">mtime</span><span class="p">,</span>
+            <span class="n">article_headline</span><span class="p">,</span>
+            <span class="n">markdown_parser</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">article_md</span><span class="p">))</span>
+
+    <span class="c1"># open index.html template from config.index_template</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">index_template</span><span class="p">)</span> <span class="k">as</span> <span class="n">index_template</span><span class="p">:</span>
+        <span class="n">index_dom</span> <span class="o">=</span> <span class="n">pq</span><span class="p">(</span><span class="n">index_template</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="c1"># open article.html template from config.article_template</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">article_template</span><span class="p">)</span> <span class="k">as</span> <span class="n">article_template</span><span class="p">:</span>
+        <span class="n">article_html</span> <span class="o">=</span> <span class="n">article_template</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">blog_main</span> <span class="o">=</span> <span class="n">index_dom</span><span class="p">(</span><span class="s2">".blog-main"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">article</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">articles_html</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+                          <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                          <span class="nb">cmp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">mtime</span> <span class="o">&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">mtime</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">mtime</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">mtime</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">article_dom</span> <span class="o">=</span> <span class="n">pq</span><span class="p">(</span><span class="n">article_html</span><span class="p">)</span>
+        <span class="c1"># now insert headline, date and content into the article dom</span>
+        <span class="n">h2_tag</span> <span class="o">=</span> <span class="n">article_dom</span><span class="p">(</span><span class="s2">".blog-post-title"</span><span class="p">)</span>
+        <span class="n">h2_tag</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">headline</span><span class="p">)</span>
+
+        <span class="n">date_repr</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">mtime</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">meta_p_tag</span> <span class="o">=</span> <span class="n">article_dom</span><span class="p">(</span><span class="s2">".blog-post-meta"</span><span class="p">)</span>
+        <span class="n">meta_p_tag</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">date_repr</span><span class="p">,</span> <span class="n">meta_p_tag</span><span class="o">.</span><span class="n">html</span><span class="p">())))</span>
+
+        <span class="n">content_dom</span> <span class="o">=</span> <span class="n">pq</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="n">content_dom</span><span class="o">.</span><span class="n">append_to</span><span class="p">(</span><span class="n">article_dom</span><span class="p">)</span>
+
+        <span class="c1"># and add the article_dom to the index_dom</span>
+        <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">article_dom</span><span class="p">)</span>
+        <span class="n">article_dom</span><span class="o">.</span><span class="n">append_to</span><span class="p">(</span><span class="n">blog_main</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destination_path</span><span class="p">,</span> <span class="s2">"index.html"</span><span class="p">),</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">index_out</span><span class="p">:</span>
+        <span class="n">index_out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">index_dom</span><span class="p">))</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">articles</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">destination</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div></div>
+<div class="blog-post">
+	<h2 class="blog-post-title">Hello World</h2>
+	<p class="blog-post-meta">2017-09-03 by <a href="/about.html">cereal</a></p><p>Memo to myself: I hate blogging like it's 1999 (even when the overall appearance isn't causing eye-cancer anymore)..</p></div>
+</div>
+			</div>
+		</div>
 	</body>
 </html>
